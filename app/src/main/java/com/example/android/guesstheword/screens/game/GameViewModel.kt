@@ -54,6 +54,9 @@ class GameViewModel : ViewModel() {
         // This is when the game is over
         private const val DONE = 0L
 
+        // count down buzz
+        private const val COUNT_DOWN_PANIC_TIME = 10L
+
         // This is the number of milliseconds in a second
         private const val ONE_SECOND = 1000L
 
@@ -101,7 +104,7 @@ class GameViewModel : ViewModel() {
         nextWord()
         _score.value = 0
 
-        // TODO (06) Set the value of buzz event to the correct BuzzType when the buzzer should
+        //  (06) Set the value of buzz event to the correct BuzzType when the buzzer should
         // fire. This should happen when the game is over, when the user gets a correct answer,
         // and on each tick when countdown buzzing starts
 
@@ -110,11 +113,15 @@ class GameViewModel : ViewModel() {
 
             override fun onTick(millisUntilFinished: Long) {
                 _currentTime.value = (millisUntilFinished / ONE_SECOND)
+                if (millisUntilFinished / ONE_SECOND <= COUNT_DOWN_PANIC_TIME){
+                    _buzzEvent.value = BuzzType.COUNTDOWN_PANIC
+                }
             }
 
             override fun onFinish() {
                 _currentTime.value = DONE
                 _eventGameFinish.value = true
+                _buzzEvent.value = BuzzType.GAME_OVER
             }
         }
 
@@ -172,6 +179,7 @@ class GameViewModel : ViewModel() {
     fun onCorrect() {
         _score.value = (_score.value)?.plus(1)
         nextWord()
+        _buzzEvent.value = BuzzType.CORRECT
     }
 
     /** Methods for completed events **/
@@ -180,11 +188,11 @@ class GameViewModel : ViewModel() {
         _eventGameFinish.value = false
     }
 
-    // TODO (07) Add a function onBuzzComplete for telling the view model when the buzz event has
+    //  (07) Add a function onBuzzComplete for telling the view model when the buzz event has
     // completed
 
     fun onBuzzComplete(){
-
+        _buzzEvent.value = BuzzType.NO_BUZZ
     }
 
     override fun onCleared() {
